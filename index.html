@@ -58,9 +58,12 @@
   <div class="mt-12 max-w-5xl mb-10" x-show="isMulti">
     <p x-text="authorList" class="font-bold ml-48 mb-12 pl-24 text-4xl"></p>
     <template x-if="isMulti" x-for="q in quotes" :key="q._id">
-      <p x-text="q.quoteText" class="font-normal mb-20 ml-48 border-l-8 pl-24 leading-tight border-orange-300 text-4xl"></p>
+      <p x-text="withQuotes(q.quoteText)" class="font-normal mb-20 ml-48 border-l-8 pl-24 leading-tight border-orange-300 text-4xl"></p>
     </template>
   </div>
+  <footer class='w-full text-center border-t border-grey p-4 mt-4 pin-b absolute bottom-0 ' x-show="isSingle">
+    clickanidea
+</footer>
 </div>
 <script>
   function main(){
@@ -104,10 +107,12 @@
           .then(response => response.json())
           .then(data => {
             this.quotes = data.quotes
-            console.log(this.urlAuthor)
             this.areLoading = false
             this.authorList = this.author
           })
+        },
+        withQuotes: function(qt){
+          return '“'+qt+'”'
         },
      }
   }
