@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Challanges - Random Quote</title>
+  <!-- <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+<style>
+  .loader {
+  border: 10px solid #f3f3f3; /* Light grey */
+  border-top: 10px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+  body{
+    font-family: 'Raleway', sans-serif;
+  }
+</style>
+<body>
+  <div x-data="main()" x-init="getQuote()">
+    <div class="w-full justify-end items-center text-md mt-6 pr-8 mr-2 text-gray-700 flex">
+      <a href="#" class="flex" @click="getQuote()">
+        <span>random</span>
+        <span class="ml-2 text-gray-800">
+          <svg class="w-5 h-5" :class="{'animate-spin': isLoading }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/><path fill="none" d="M0 0h24v24H0z"/></svg>
+        </span>
+      </a>
+    </div>
+    <!-- Loader -->
+    <div class="loader mx-auto mt-12" x-show="areLoading"></div>
+    <!-- Single Quote -->
+    <div x-show="isSingle">
+      <div class="mt-40 max-w-5xl">
+        <p  x-text="quote" class="font-normal mb-20 ml-48 border-l-8 pl-24 leading-tight border-orange-300 text-4xl"></p>
+      </div>
+      <div class="max-w-3xl h-32 ml-64 flex items-center group hover:bg-gray-800 cursor-pointer transition duration-700 ease-in-out justify-between"
+      @click="getQuotes()">
+      <div class="flex-col">
+        <p class="ml-10 font-bold text-gray-700 group-hover:text-white"  x-text="author"></p>
+        <p class="ml-10 text-gray-600 group-hover:text-gray-200"  x-text="genre"></p>
+      </div>
+      <div>
+        <svg  class="w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path d="M0 0h36v36H0z" fill="none"/><path fill="#FFF" d="M18 6l-2.12 2.12 8.38 8.38H6v3h18.26l-8.38 8.38L18 30l12-12z"/></svg>
+      </div>
+    </div>
+  </div>
+  <!-- List Quotes -->
+  <div class="mt-12 max-w-5xl mb-10" x-show="isMulti">
+    <p x-text="authorList" class="font-bold ml-48 mb-12 pl-24 text-4xl"></p>
+    <template x-if="isMulti" x-for="q in quotes" :key="q._id">
+      <p x-text="q.quoteText" class="font-normal mb-20 ml-48 border-l-8 pl-24 leading-tight border-orange-300 text-4xl"></p>
+    </template>
+  </div>
+</div>
+<script>
+  function main(){
+      return {
+        quote: '',
+        author: '',
+        authorList: '',
+        genre: '',
+        quotes: [],
+        isSingle: true,
+        isMulti: false,
+        areLoading: false,
+        isLoading: false,
+        urlRandom: 'https://quote-garden.herokuapp.com/api/v2/quotes/random',
+        urlAuthor: '',
+        getQuote: function() {
+          this.isMulti = false
+          this.isLoading = true
+          this.isSingle = true
+          this.areLoading = false
+          this.quote = ''
+          this.author = ''
+          this.authorList = ''
+          this.genre = ''
+          this.quotes = [],
+          fetch(this.urlRandom)
+          .then(response => response.json())
+          .then(data => {
+            this.quote = '“'+data.quote.quoteText+'”'
+            this.author = data.quote.quoteAuthor
+            this.genre = data.quote.quoteGenre
+            this.isLoading = false
+          })
+        },
+        getQuotes: function(){
+          this.areLoading = true
+          this.isMulti = true
+          this.urlAuthor = `https://quote-garden.herokuapp.com/api/v2/authors/${this.author}?limit=5`
+          this.isSingle = false
+          fetch(this.urlAuthor)
+          .then(response => response.json())
+          .then(data => {
+            this.quotes = data.quotes
+            console.log(this.urlAuthor)
+            this.areLoading = false
+            this.authorList = this.author
+          })
+        },
+     }
+  }
+  </script>
+</body>
+</html>
